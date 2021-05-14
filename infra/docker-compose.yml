@@ -1,0 +1,44 @@
+version: "3"
+services:
+  python:
+    build: ./python
+    ports:
+      - 5000:5000
+    volumes:
+      - "../$WORKDIR:/$WORKDIR"
+    working_dir: "/$WORKDIR"
+    command: flask run --host 0.0.0.0 --port 5000
+    depends_on:
+      - db
+    privileged: true
+    tty: true
+    environment:
+      TZ: Asia/Tokyo
+    restart: always
+
+  db:
+    # image: mysql:5.7
+    image: mariadb:10.5
+    volumes:
+      - ./mysql/data:/var/lib/mysql
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: hiyoko
+      MYSQL_USER: hiyoko
+      MYSQL_PASSWORD: hiyoko
+
+  phpmyadmin:
+    image: phpmyadmin
+    environment:
+      PMA_HOST: "db"
+      UPLOAD_LIMIT: 102400000
+    ports:
+      - 8888:80
+    depends_on:
+      - db
+
+networks:
+  nginx_network:
+    driver: bridge
